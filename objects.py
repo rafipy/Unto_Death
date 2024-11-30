@@ -64,24 +64,62 @@ class Timer(): #Object for creating timers and cooldowns in attacks
 
 
 class Fighter(): #Refers to the fighters that the player will control
-    def __init__(self, x,y):
-        self.health = 100
-        self.flip = False # For the x coordinate of attacking rect
-        self.rect = pygame.Rect((x,y,96,192))
+    def __init__(self, x,y, flip, data, sprite_sheet, animation_steps, player):
+        self.flip = flip # For the x coordinate of attacking rect
+        self.rect = pygame.Rect((x,y,80, 120))
         self.vel_y = 0 #will be used for physics calculations
         self.jumping = False
+        self.running = False
+        self.rolling = False
+        self.hit = False
+        self.alive = True
+        
+        self.parry = pygame.Rect(1, 1, 1, 1)
+        
+        
         self.jumpTimer = Timer() # This is extremely botched and I know it is, I can only apologize for the grievous sins I'm committing.
-
         self.attackTimer = Timer()
-        self.attackCount = 0
-        self.attackType = 0
+        self.rollTimer = Timer()
+        
+        self.jumpTime = 0
+        self.attackTime = 0
+        self.rollTime = 0
+        
+        self.updateTime = pygame.time.get_ticks()
+       
         self.attacking = False
-      
+        
+        self.size = data[0]
+        self.scale = data[1]
+        self.offset = data[2]
+        
+        self.animationList = self.animationCreate(sprite_sheet, animation_steps)
+        self.action = 6
+        self.frameIndex = 0
+        self.image = self.animationList[self.action][self.frameIndex]
 
         self.gravity = GRAVITY
+        self.health = 100
 
         self.stun = False
+        
+        self.player = player #checks which player they are
      
+    def animationCreate(self, sprite_sheet, animation_steps):
+        
+        # extract images from spritesheet
+        animation_list = [] # The actual list containing all the elements
+        for y, animation in enumerate(animation_steps): #This function same as adding y each time animation steps goes on but cooler, this for loop is just for extracting.
+            tempImgList = []
+            
+            for x in range(animation):
+                tempImg = sprite_sheet.subsurface(x * self.size[1], y * self.size[0], self.size[1], self.size[0]) #take a part of the image
+                tempImgList.append(pygame.transform.scale(tempImg, (self.size[1] * self.scale, self.size[0] * self.scale)))
+                
+            animation_list.append(tempImgList)
+        print
+        return animation_list
+    
     def drawHealthBar(self, health, screen, x, y):
         ratio = health  / 100
         pygame.draw.rect(screen, RED, (x-2, y-2, 405, 35))
@@ -92,86 +130,105 @@ class Fighter(): #Refers to the fighters that the player will control
     def move(self, screen, target):
         dx = 0
         dy = 0
+        self.running = False
+        self.attack_type = 0
 
         #get keypresses
         key = pygame.key.get_pressed()
 
-        if self.attacking == False:
+        if self.attacking == False and self.rolling == False and self.hit == False:
 
         #check for key to be pressed
-            if key[pygame.K_a]:
-                dx = -SPEED
-                self.flip = True
-            if key[pygame.K_d]:
-                dx = SPEED
-                self.flip = False
-
-        #jumping
-            if key[pygame.K_w] and not self.jumping: 
-                self.gravity = GRAVITY
-                self.vel_y = -40
-                self.jumping = True
-                self.jumpTimer.startTimer()
-
-
-        #Attacks 1 - 4: Ground Attacks, 5: Jump Attack, 6: Parry
-            if key[pygame.K_r] or key[pygame.K_t]: 
-                if key[pygame.K_r] and self.vel_y != 0: #jumping attack
-                    self.attackType = 5
-                    self.attack(screen, target)
+            if self.player == 1:
+                if key[pygame.K_a]:
+                    dx = -SPEED 
+                    self.running = True
                 
-                elif key[pygame.K_t]:
-                    self.attackType = 6
-                    self.attack(screen, target)
-                    
-                elif key[pygame.K_r]:
-                    
-                    if self.attackCount == 0: #for the main bread and butter combo
-                        if self.attackTimer.executeTimer(self.attackTimer.time,1):
-                            self.attackCount += 1
-                            self.attackType = 1
-                            self.attack(screen, target)
-                        else:
-                            self.attackTimer.startTimer()
-
-
-                    elif self.attackCount == 1:
-                        if self.attackTimer.executeTimer(self.attackTimer.time,1):
-                            self.attackCount += 1
-                            self.attackType = 2
-                            self.attack(screen, target)
-                        else:
-                            self.attackTimer.startTimer()
-
-                    elif self.attackCount == 2:
-                        if self.attackTimer.executeTimer(self.attackTimer.time,1):
-                            self.attackCount += 1
-                            self.attackType = 3
-                            self.attack(screen, target)
-                        else:
-                            self.attackTimer.startTimer()
-
-                    elif self.attackCount == 3:
-                        if self.attackTimer.executeTimer(self.attackTimer.time,1):
-                            self.attackCount = 0
-                            self.attackType = 4
-                            self.attack(screen, target)
-                        else:
-                            self.attackTimer.startTimer()
+                if key[pygame.K_d]:
+                    dx = SPEED 
+                    self.running = True
                 
+                    
+                if key[pygame.K_q]:
+                    self.roll(screen)
+                    self.rollTime = self.rollTimer.startTimer()
+                
+                if self.rolling == False:
+                    
+                #jumping   
+                    if key[pygame.K_w] and not self.jumping: 
+                        self.gravity = GRAVITY
+                        self.vel_y = -35
+                        self.jumping = True
+                        self.jumpTimer.startTimer()
 
+
+                #Attacks
+                    if key[pygame.K_r] or key[pygame.K_t]: 
+                        self.attack(screen, target)
+                        if key[pygame.K_t]:
+                            self.attack_type = 2
+                        elif key[pygame.K_r]:
+                            self.attack_type = 1
+                            self.attackTime = self.attackTimer.startTimer()
+                #for dashing
+                    if key[pygame.K_LSHIFT] and key[pygame.K_d]:
+                        dx += SPRINT
+                        self.attackCount = 0
+                        self.dashing = True
+                    if key[pygame.K_LSHIFT] and key[pygame.K_a]:
+                        dx -= SPRINT
+                        self.attackCount = 0
+                        self.dashing = True                    
+                                        
+            elif self.player == 2:
+                if key[pygame.K_LEFT]:
+                    dx = -SPEED 
+                    self.running = True
+                
+                if key[pygame.K_RIGHT]:
+                    dx = SPEED 
+                    self.running = True
+                
+                    
+                if key[pygame.K_QUOTEDBL]:
+                    self.roll(screen)
+                    self.rollTime = self.rollTimer.startTimer()
+                
+                if self.rolling == False:
+                    
+                #jumping   
+                    if key[pygame.K_UP] and not self.jumping: 
+                        self.gravity = GRAVITY
+                        self.vel_y = -35
+                        self.jumping = True
+                        self.jumpTime = pygame.time.get_ticks()
+
+
+                #Attacks
+                    if key[pygame.K_SLASH] or key[pygame.K_PERIOD]: 
+                        self.attack(screen, target)
+                        if key[pygame.K_SLASH]:
+                            self.attack_type = 2
+                        elif key[pygame.K_PERIOD]:
+                            self.attack_type = 1
+                            self.attackTime = self.attackTimer.startTimer()
+                    
+                #for dashing
+                    if key[pygame.K_RSHIFT] and key[pygame.K_RIGHT]:
+                        dx += SPRINT
+                        self.attackCount = 0
+                        self.dashing = True
+                    if key[pygame.K_RSHIFT] and key[pygame.K_LEFT]:
+                        dx -= SPRINT
+                        self.attackCount = 0
+                        self.dashing = True      
         
         #apply gravity
         self.vel_y += self.gravity
         dy += self.vel_y
 
-        #for dashing
-        if key[pygame.K_LSHIFT] and key[pygame.K_d]:
-            dx += SPRINT
-            self.attackCount = 0
-        if key[pygame.K_LSHIFT] and key[pygame.K_a]:
-            dx -= SPRINT
-            self.attackCount = 0
+        
             
         
         #ensure player remains on the screen
@@ -183,10 +240,16 @@ class Fighter(): #Refers to the fighters that the player will control
             self.vel_y = 0
             dy = WIN_HEIGHT - 126 - self.rect.bottom
             self.gravity = GRAVITY
-            self.push = 0
-            
-            if self.jumpTimer.executeTimer(self.jumpTimer.time,1) and self.jumping == True: #checks if the last time you pressed W is more than 1 seconds before you can jump again
+            if pygame.time.get_ticks() - self.jumpTime > 1000:
                 self.jumping = False
+            
+            
+      
+        # ensure players are facing one another 
+        if target.rect.centerx > self.rect.centerx:
+            self.flip = False
+        else:
+            self.flip = True
 
         #updates player position
         self.rect.x += dx
@@ -194,12 +257,113 @@ class Fighter(): #Refers to the fighters that the player will control
 
 
     def draw(self, screen):
+        img = pygame.transform.flip(self.image, self.flip, False) #flip horizontal if self flip 1 then it will be true.
         pygame.draw.rect(screen, (255,0,0), self.rect)
+        screen.blit(img, (self.rect.x - (self.offset[self.flip][0] * self.scale) , self.rect.y - (self.offset[self.flip][1] * self.scale)))
     
-
+    
+        
+    
+    def update(self): #updates sprite
+        # check action before running
+        animationCooldown = 50
+        stunTime = 0
+        
+        if self.health <= 0:
+            self.health = 0
+            self.alive = False
+            self.updateAction(3)
+            
+        
+            
+        elif self.hit == True:
+            animationCooldown = 150
+            self.updateAction(4)
+         
+        elif self.stun == True:
+            animationCooldown = 200
+            self.updateAction(4)
+            stunTime = pygame.time.get_ticks()
+         
+        elif self.attacking == True:
+            animationCooldown = 100
+            if self.attack_type == 1:
+                animationCooldown = 75
+                self.updateAction(0)
+                
+                
+            elif self.attack_type == 2:
+                self.updateAction(1)
+                
+            
+        elif self.jumping == True:
+            self.updateAction(6)
+           
+        elif self.rolling == True:
+            self.updateAction(7)
+      
+        elif self.running == True:
+            self.updateAction(8)
+        else:
+            self.updateAction(5)
+          
+        
+        self.image = self.animationList[self.action][self.frameIndex]
+        if pygame.time.get_ticks() - self.updateTime > animationCooldown:
+            self.frameIndex += 1
+            self.updateTime = pygame.time.get_ticks()
+        #checks if animation has ended
+        if self.frameIndex >= len(self.animationList[self.action]):
+            
+            if self.alive == False:
+                self.frameIndex = len(self.animationList[self.action]) - 1
+            
+            else:
+                
+                self.frameIndex = 0
+                
+                # check if attack is executed
+                if self.action == 4 and self.stun == True:
+                    if pygame.time.get_ticks() - stunTime > 1000:
+                        self.stun = False
+                
+                elif self.action == 0 or self.action == 1:
+                    while not self.attackTimer.executeTimer(self.attackTime, 0.6):
+                        pass
+                    self.attacking = False
+                
+                elif self.action == 4:
+                    self.hit = False
+                    self.attacking = False
+                
+                elif self.action == 7:
+                    while not self.rollTimer.executeTimer(self.rollTime, 0.9):
+                        self.action == 7
+                  
+                    self.rolling = False
+                
+        
+    def updateAction(self, newAction):
+        # checks if current action is different to previous one
+        if newAction != self.action:
+            self.action = newAction
+            self.frameIndex = 0
+            self.updateTime = pygame.time.get_ticks()
+            
+    def roll(self, screen):
+        self.rolling = True
+        self.parry = pygame.Rect(self.rect.centerx - (2 * self.rect.width * self.flip), self.rect.y, 1.5*self.rect.width, self.rect.height)
+        pygame.draw.rect(screen, (0,255,0), self.parry)
+            
     def attack(self,screen, target):
         self.attacking = True
-        attacking_rect = pygame.Rect(self.rect.centerx - (2 * self.rect.width * self.flip), self.rect.y, 2*self.rect.width, self.rect.height-100)
+        attacking_rect = pygame.Rect(self.rect.centerx - (2 * self.rect.width * self.flip), self.rect.y, 2*self.rect.width, self.rect.height) #self.flip will make the box behind by moving x axis
         pygame.draw.rect(screen, (0,0,255), attacking_rect)
-        if attacking_rect.colliderect(target.rect): #checks if collision between rect
+        
+        if attacking_rect.colliderect(target.parry):
+            self.stun = True
+            print("Stunned!")
+        
+        elif attacking_rect.colliderect(target.rect): #checks if collision between rect
             target.health -= 10
+            target.hit = True

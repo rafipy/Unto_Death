@@ -1,4 +1,5 @@
 import pygame
+import pygame_textinput
 from sprites import* 
 from config import*
 from objects import*
@@ -41,8 +42,10 @@ class Game:
 
         if START.clickCheck(self.screen) == True:
             self.state = "local"
-        else:
-            self.state = "menu"
+
+        if MULTI.clickCheck(self.screen) == True:
+            self.state = "lan"
+       
 
     def localBattle(self):
 
@@ -54,12 +57,29 @@ class Game:
 
         #establish control
         fighter_1.move(self.screen, fighter_2)
+        fighter_2.move(self.screen, fighter_1)
         
-
+        fighter_1.update()
+        fighter_2.update()
+        
         fighter_1.draw(self.screen)
         fighter_2.draw(self.screen)
 
         pygame.display.update()
+    
+    def connectLAN(self):
+        self.screen.fill((50,50, 100))
+        textinput = pygame_textinput.TextInputVisualizer()
+        
+        events = pygame.event.get() #Gets keys yuh
+        self.drawText("Enter Server IP!", self.fontH1, WHITE, (WIN_WIDTH//2) - 360, WIN_HEIGHT//2 - 250)
+        textinput.update(events)
+        screen.blit(textinput.surface, ((WIN_WIDTH//2) - 360, WIN_HEIGHT//2))
+        
+        pygame.display.update()
+        
+    
+    
        
 
 
@@ -75,7 +95,8 @@ while game.running:
         game.mainMenu()
     elif game.state == "local":
         game.localBattle()
-    
+    elif game.state == "lan":
+        game.connectLAN()
     
 
 pygame.quit()

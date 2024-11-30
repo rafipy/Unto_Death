@@ -24,5 +24,20 @@ BG_IMG = pygame.image.load("sprites\\background\Background.png").convert_alpha()
 BG = pygame.transform.scale(BG_IMG, (WIN_WIDTH, WIN_HEIGHT))
 
 # # Character Sprites
-fighter_1 = Fighter(200, 401)
-fighter_2 = Fighter(1000, 401)
+FIGHTER1_SHEET = pygame.image.load("sprites\players\\fighter_1.png").convert_alpha()
+FIGHTER2_SHEET = pygame.image.load("sprites\players\\fighter_2.png").convert_alpha()
+
+# # Fighter Config
+FIGHTER_SIZE = (80, 120)
+FIGHTER_SCALE = 3
+FIGHTER_OFFSET = [[41, 40], [52, 40]]
+FIGHTER1_DATA = [FIGHTER_SIZE, FIGHTER_SCALE, FIGHTER_OFFSET]
+
+
+FIGHTER2_DATA = [FIGHTER_SIZE, FIGHTER_SCALE, FIGHTER_OFFSET]
+
+# # Animation images per row 
+FIGHTER_ANIMS = [4,6,2,10,1,10,16,12,10]
+
+fighter_1 = Fighter(200, 401, False, FIGHTER1_DATA, FIGHTER1_SHEET, FIGHTER_ANIMS, 1)
+fighter_2 = Fighter(1000, 401, True, FIGHTER2_DATA, FIGHTER2_SHEET, FIGHTER_ANIMS, 2)

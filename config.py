@@ -13,6 +13,6 @@ DARK_RED = (100, 0,0)
 
 
 #GAME, behavioural properties
-SPEED = 6
-SPRINT = 10
-GRAVITY = 2
+SPEED = 8
+SPRINT = 9
+GRAVITY = 1.5
