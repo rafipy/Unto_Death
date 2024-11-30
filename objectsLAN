@@ -1,0 +1,137 @@
+import pygame
+from config import *
+from objects import Timer, Fighter
+
+class LocalFighter(Fighter): #Refers to the fighters that the player will control in LAN
+    
+    KEYS = [pygame.K_d, pygame.K_a, pygame.K_w, pygame.K_q, pygame.K_LSHIFT, pygame.K_r, pygame.K_t]
+    
+    def move(self, screen, target):
+        dx = 0
+        dy = 0
+        self.running = False
+        self.attack_type = 0
+
+        #get keypresses
+        key = pygame.key.get_pressed()
+
+        if self.attacking == False and self.rolling == False and self.hit == False:
+
+        #check for key to be pressed
+            if self.player == 1:
+                if key[pygame.K_a]:
+                    dx = -SPEED 
+                    self.running = True
+                
+                if key[pygame.K_d]:
+                    dx = SPEED 
+                    self.running = True
+                
+                    
+                if key[pygame.K_q]:
+                    self.roll(screen)
+                    self.rollTime = self.rollTimer.startTimer()
+                
+                if self.rolling == False:
+                    
+                #jumping   
+                    if key[pygame.K_w] and not self.jumping: 
+                        self.gravity = GRAVITY
+                        self.vel_y = -35
+                        self.jumping = True
+                        self.jumpTimer.startTimer()
+
+
+                #Attacks
+                    if key[pygame.K_r] or key[pygame.K_t]: 
+                        self.attack(screen, target)
+                        if key[pygame.K_t]:
+                            self.attack_type = 2
+                        elif key[pygame.K_r]:
+                            self.attack_type = 1
+                            self.attackTime = self.attackTimer.startTimer()
+                #for dashing
+                    if key[pygame.K_LSHIFT] and key[pygame.K_d]:
+                        dx += SPRINT
+                        self.attackCount = 0
+                        self.dashing = True
+                    if key[pygame.K_LSHIFT] and key[pygame.K_a]:
+                        dx -= SPRINT
+                        self.attackCount = 0
+                        self.dashing = True                    
+                                        
+            elif self.player == 2:
+                if key[pygame.K_LEFT]:
+                    dx = -SPEED 
+                    self.running = True
+                
+                if key[pygame.K_RIGHT]:
+                    dx = SPEED 
+                    self.running = True
+                
+                    
+                if key[pygame.K_QUOTEDBL]:
+                    self.roll(screen)
+                    self.rollTime = self.rollTimer.startTimer()
+                
+                if self.rolling == False:
+                    
+                #jumping   
+                    if key[pygame.K_UP] and not self.jumping: 
+                        self.gravity = GRAVITY
+                        self.vel_y = -35
+                        self.jumping = True
+                        self.jumpTime = pygame.time.get_ticks()
+
+
+                #Attacks
+                    if key[pygame.K_SLASH] or key[pygame.K_PERIOD]: 
+                        self.attack(screen, target)
+                        if key[pygame.K_SLASH]:
+                            self.attack_type = 2
+                        elif key[pygame.K_PERIOD]:
+                            self.attack_type = 1
+                            self.attackTime = self.attackTimer.startTimer()
+                    
+                #for dashing
+                    if key[pygame.K_RSHIFT] and key[pygame.K_RIGHT]:
+                        dx += SPRINT
+                        self.attackCount = 0
+                        self.dashing = True
+                    if key[pygame.K_RSHIFT] and key[pygame.K_LEFT]:
+                        dx -= SPRINT
+                        self.attackCount = 0
+                        self.dashing = True      
+        
+        #apply gravity
+        self.vel_y += self.gravity
+        dy += self.vel_y
+
+        
+            
+        
+        #ensure player remains on the screen
+        if self.rect.left + dx < 0:
+            dx = 0 - self.rect.left #insures that left side touches edge
+        if self.rect.right + dx > WIN_WIDTH:
+            dx = WIN_WIDTH - self.rect.right
+        if self.rect.bottom + dy > WIN_HEIGHT - 126: #include the ground
+            self.vel_y = 0
+            dy = WIN_HEIGHT - 126 - self.rect.bottom
+            self.gravity = GRAVITY
+            if pygame.time.get_ticks() - self.jumpTime > 1000:
+                self.jumping = False
+            
+            
+      
+        # ensure players are facing one another 
+        if target.rect.centerx > self.rect.centerx:
+            self.flip = False
+        else:
+            self.flip = True
+
+        #updates player position
+        self.rect.x += dx
+        self.rect.y += dy
+
+       

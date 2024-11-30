@@ -68,15 +68,46 @@ class Game:
         pygame.display.update()
     
     def connectLAN(self):
-        self.screen.fill((50,50, 100))
-        textinput = pygame_textinput.TextInputVisualizer()
         
-        events = pygame.event.get() #Gets keys yuh
-        self.drawText("Enter Server IP!", self.fontH1, WHITE, (WIN_WIDTH//2) - 360, WIN_HEIGHT//2 - 250)
-        textinput.update(events)
-        screen.blit(textinput.surface, ((WIN_WIDTH//2) - 360, WIN_HEIGHT//2))
+        # But more customization possible: Pass your own font object
+        font = pygame.font.SysFont("Consolas", 55)
         
-        pygame.display.update()
+        # Create own manager with custom input validator
+        manager = pygame_textinput.TextInputManager(validator = lambda input: len(input) == )
+        
+        # Pass these to constructor
+        textinput = pygame_textinput.TextInputVisualizer(manager=manager, font_object=font)
+        
+        # Customize much more
+  
+        textinput.cursor_blink_interval = 400 # blinking interval in ms
+        textinput.antialias = False
+        textinput.font_color = WHITE
+        pygame.key.set_repeat(200, 25)
+        
+        
+        while True:
+            self.screen.fill((50,50, 100))
+            
+            self.drawText("Enter Server IP!", self.fontH1, WHITE, (WIN_WIDTH//2) - 360, WIN_HEIGHT//2 - 250)
+            
+            events = pygame.event.get() #Gets keys yuh
+            
+            textinput.update(events)
+     
+        
+            screen.blit(textinput.surface, ((WIN_WIDTH//2) - 150,  WIN_HEIGHT//2 ))
+        
+            
+            for event in events:
+                if event.type == pygame.QUIT:
+                    exit()
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    print(f"User pressed enter! Input so far: {textinput.value}")
+                    
+            pygame.display.update()
+        
         
     
     
