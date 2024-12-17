@@ -25,6 +25,22 @@ cd PATH/TO/GITHUB/CLONE/Unto_Death
 python3 main.py
 ```
 or
-Simply running it on an IDE like Pycharm or Visual Studio Code
+
+simply running it on an IDE like Pycharm or Visual Studio Code. 
+
+## How to Play
+The controls are listed for both players below.
+
+### Player 1
+- Q -> Parry
+- W -> Jump
+- A, D -> Move Left and Right
+- LSHIFT -> Sprint
+
+### Player 2
+- ' -> Parry
+- UPARROW -> Jump
+- LEFTARROW, RIGHTARROW -> Move Left and Right
+- RSHIFT -> Sprint
 
 
