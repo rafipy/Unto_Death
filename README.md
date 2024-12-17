@@ -42,7 +42,7 @@ The controls are listed for both players below.
 - ' -> Parry
 - UPARROW -> Jump
 - LEFTARROW, RIGHTARROW -> Move Left and Right
-- - / AND . -> Attack
+- / AND . -> Attack
 - RSHIFT -> Sprint
 
 
