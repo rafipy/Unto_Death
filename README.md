@@ -34,13 +34,15 @@ The controls are listed for both players below.
 ### Player 1
 - Q -> Parry
 - W -> Jump
-- A, D -> Move Left and Right
+- A AND D -> Move Left and Right
+- R AND T -> Attack
 - LSHIFT -> Sprint
 
 ### Player 2
 - ' -> Parry
 - UPARROW -> Jump
 - LEFTARROW, RIGHTARROW -> Move Left and Right
+- - / AND . -> Attack
 - RSHIFT -> Sprint
 
 
