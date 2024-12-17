@@ -26,7 +26,7 @@ python3 main.py
 ```
 or
 
-simply running it on an IDE like Pycharm or Visual Studio Code. 
+Running it on an IDE like __Pycharm__ or __Visual Studio Code__. 
 
 ## How to Play
 The controls are listed for both players below.
