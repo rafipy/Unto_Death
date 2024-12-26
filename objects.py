@@ -91,7 +91,7 @@ class Fighter:
         self.animationList = self.animationCreate(sprite_sheet, animation_steps)
         self.image = self.animationList[self.action][self.frameIndex]
 
-        self.health = 50
+        self.health = 100
         self.stun = False
 
         self.player = player  # checks which player they are
@@ -241,7 +241,7 @@ class Fighter:
         # get key presses
         key = pygame.key.get_pressed()
         #
-        if self.hit == False and self.stun == False:
+        if self.hit == False and self.stun == False and self.attacking == False:
 
             # check for key to be pressed
             if self.player == 1:
