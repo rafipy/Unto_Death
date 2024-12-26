@@ -58,7 +58,7 @@ class Timer: #Object for creating timers and cooldowns in attacks
 
 
 class Fighter:
-    def __init__(self, x, y, flip, data, sprite_sheet, animation_steps, player, soundData):
+    def __init__(self, x, y, flip, data, sprite_sheet, animation_steps, player, sound_data):
         self.flip = flip  # For the x coordinate of attacking rect
 
         self.vel_y = 0  # will be used for physics calculations
@@ -97,11 +97,11 @@ class Fighter:
         self.player = player  # checks which player they are
 
  
-        self.attackSFX = soundData[0]
-        self.parrySFX = soundData[1]
-        self.deathSFX = soundData[2]
-        self.rollSFX = soundData[3]
-        self.jumpSFX = soundData[4]
+        self.attackSFX = sound_data[0]
+        self.parrySFX = sound_data[1]
+        self.deathSFX = sound_data[2]
+        self.rollSFX = sound_data[3]
+        self.jumpSFX = sound_data[4]
 
         
         
