@@ -1,7 +1,8 @@
 # Unto Death
-This is a game created for Algorithm and Programming and serves as the final project. 
 
 ![screenshot](Unto_Death_Poster_A3.png)
+
+This is a game created for Algorithm and Programming and serves as the final project. 
 
 ## Features
 - Couch Multiplayer Fighting Game
