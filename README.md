@@ -6,6 +6,8 @@ This is a game created for Algorithm and Programming and serves as the final pro
 - A patience-oriented gameplay loop focusing more on parrying and timing to mitigate spamming
 - ~~LAN play through sockets~~ As of now this will not be done and is in the *to make* list.
 
+![screenshot](Unto_Death_Poster_A3.png)
+
 ## Installation
 Running the game requires you to git clone this one any IDE or straight from github desktop through the link. 
 After cloning the game insure you have the **pygame** module downloaded  if not follow the commands below.
